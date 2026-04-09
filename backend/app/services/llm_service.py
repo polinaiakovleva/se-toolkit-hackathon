@@ -78,50 +78,12 @@ class LLMService:
         # Add unique request ID to prevent any caching
         request_id = str(uuid.uuid4())[:8]
 
-        return f"""[Request ID: {request_id}]
+        return f"""Extract tasks from text. Today: {today_str}. Tomorrow: {tomorrow_str}.
+Keep title in same language as input. Remove date/time from title. Convert relative dates to ISO format (YYYY-MM-DDTHH:MM:SS).
+Priority: low/medium/high/critical. Extract tags (lowercase, no #).
 
-You are a task extraction assistant. Extract tasks from the given text ONLY.
-
-CURRENT DATE AND TIME:
-- Today: {today_str} ({today_weekday})
-- Current time: {current_time}
-- Tomorrow: {tomorrow_str} ({tomorrow_weekday})
-- This Saturday (this week): {this_saturday}
-- Next Saturday (next week): {next_saturday}
-
-CRITICAL RULES:
-1. LANGUAGE PRESERVATION - The title MUST be written in the EXACT SAME LANGUAGE as the input. If input is Russian, title MUST be Russian. If input is English, title MUST be English. DO NOT translate, DO NOT change language, DO NOT mix languages.
-2. Title: Extract ONLY the task action, NOT the date/time. Keep it SHORT (2-5 words). Remove ALL date/time words like "tomorrow", "завтра", "at 5pm", "в 17:00" from title.
-3. Deadline: Extract date/time separately and convert to ISO format. ALWAYS set deadline if any time reference is mentioned.
-4. Tags: Extract categories as simple words (lowercase, no # symbol).
-5. ONLY extract tasks from the input text below. Do NOT include any other tasks.
-
-DEADLINE CONVERSION:
-- "today" / "сегодня" → {today_str}T00:00:00
-- "tomorrow" / "завтра" → {tomorrow_str}T00:00:00
-- "tomorrow at 5pm" / "завтра в 17:00" → {tomorrow_str}T17:00:00
-- "Saturday" / "суббота" → {this_saturday}T00:00:00
-- "next Saturday" / "следующая суббота" → {next_saturday}T00:00:00
-
-EXAMPLES:
-Input: "Купить продукты завтра в 5 вечера"
-Output: {{"tasks": [{{"title": "Купить продукты", "description": null, "priority": "medium", "deadline": "{tomorrow_str}T17:00:00", "tags": []}}]}}
-
-Input: "Submit report by Friday at 3pm #work"
-Output: {{"tasks": [{{"title": "Submit report", "description": null, "priority": "medium", "deadline": "2026-04-11T15:00:00", "tags": ["work"]}}]}}
-
-Input: "buy groceries tomorrow at 5pm"
-Output: {{"tasks": [{{"title": "Buy groceries", "description": null, "priority": "medium", "deadline": "{tomorrow_str}T17:00:00", "tags": []}}]}}
-
-Input: "Call mom tomorrow and submit report by Friday"
-Output: {{"tasks": [{{"title": "Call mom", "description": null, "priority": "medium", "deadline": "{tomorrow_str}T00:00:00", "tags": []}}, {{"title": "Submit report", "description": null, "priority": "medium", "deadline": "2026-04-11T00:00:00", "tags": []}}]}}
-
-Output format (JSON only, no markdown, no explanation):
-{{"tasks": [{{"title": "...", "description": null, "priority": "medium", "deadline": "YYYY-MM-DDTHH:MM:SS", "tags": ["..."]}}]}}
-
-Input text to process: "{text}"
-
-Return ONLY valid JSON:"""
+Input: "{text}"
+Return JSON: {{"tasks":[{{"title":"...","description":null,"priority":"medium","deadline":"YYYY-MM-DDTHH:MM:SS","tags":[]}}]}}"""
 
     async def parse_tasks(
         self, text: str, current_date: Optional[datetime] = None
