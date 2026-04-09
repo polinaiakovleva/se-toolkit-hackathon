@@ -39,8 +39,8 @@ class Task(Base):
     description = Column(Text, nullable=True)
     deadline = Column(DateTime, nullable=True)
     is_all_day = Column(Boolean, default=False)  # Flag for all-day tasks
-    priority = Column(SQLEnum(Priority), default=Priority.MEDIUM)
-    status = Column(SQLEnum(Status), default=Status.PENDING)
+    priority = Column(SQLEnum(Priority, values_callable=lambda obj: [e.value for e in obj]), default=Priority.MEDIUM)
+    status = Column(SQLEnum(Status, values_callable=lambda obj: [e.value for e in obj]), default=Status.PENDING)
     source_text = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
