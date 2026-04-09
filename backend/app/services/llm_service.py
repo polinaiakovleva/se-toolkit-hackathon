@@ -140,9 +140,12 @@ Return JSON: {{"tasks":[{{"title":"...","description":null,"priority":"medium","
                         )
 
                 # Normalize priority
-                priority = task_data.get("priority", "medium").lower()
-                if priority not in ["low", "medium", "high", "critical"]:
-                    priority = "medium"
+                priority_str = task_data.get("priority", "medium").lower()
+                if priority_str not in ["low", "medium", "high", "critical"]:
+                    priority_str = "medium"
+                # Convert string to Priority enum
+                priority_map = {"low": Priority.LOW, "medium": Priority.MEDIUM, "high": Priority.HIGH, "critical": Priority.CRITICAL}
+                priority = priority_map.get(priority_str, Priority.MEDIUM)
 
                 # Ensure title exists
                 title = task_data.get("title", "")
@@ -153,7 +156,7 @@ Return JSON: {{"tasks":[{{"title":"...","description":null,"priority":"medium","
                     ParsedTask(
                         title=title,
                         description=task_data.get("description"),
-                        priority=Priority(priority),
+                        priority=priority,
                         deadline=deadline.isoformat() if deadline else None,
                         tags=task_data.get("tags", []),
                     )
