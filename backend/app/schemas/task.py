@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from app.models.task import Priority, Status
 
 
@@ -74,6 +74,21 @@ class ParsedTask(BaseModel):
     deadline: Optional[str] = None  # ISO date string
     is_all_day: Optional[bool] = None
     tags: List[str] = []
+
+    @field_validator('priority', mode='before')
+    @classmethod
+    def normalize_priority(cls, v):
+        """Normalize priority to lowercase."""
+        if isinstance(v, str):
+            v_lower = v.lower()
+            priority_map = {
+                'low': Priority.LOW,
+                'medium': Priority.MEDIUM,
+                'high': Priority.HIGH,
+                'critical': Priority.CRITICAL
+            }
+            return priority_map.get(v_lower, Priority.MEDIUM)
+        return v
 
 
 class TaskParseResponse(BaseModel):
